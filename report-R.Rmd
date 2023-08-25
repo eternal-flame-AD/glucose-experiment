@@ -1,0 +1,116 @@
+---
+title: "Glucose Trends"
+---
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+```{r data}
+glu <- tribble(
+    ~group, ~time, ~reltime, ~act, ~qty, ~glu,
+    1, "2/27/23 18:43", -5, "juice", 80, 84,
+    1, "2/27/23 19:12", NA, "juice", 80, 109,
+    1, "2/27/23 19:29", NA, "juice", 80, 116,
+    1, "2/27/23 19:55", NA, "juice", 80, 87,
+    1, "2/27/23 20:22", NA, "juice", 80, 86,
+    2, "2/28/23 20:52", NA, "null", 0, 98,
+    2, "2/28/23 21:23", 0, "null", 0, 83,
+    2, "2/28/23 21:52", NA, "null", 0, 85,
+    2, "2/28/23 22:22", NA, "null", 0, 83,
+    2, "2/28/23 23:07", NA, "null", 0, 82,
+    3, "3/01/23 18:42", NA, "exercise", 30, 87,
+    3, "3/01/23 19:28", 3, "exercise", 30, 115,
+    3, "3/01/23 19:38", NA, "exercise", 30, 100,
+    3, "3/01/23 19:56", NA, "exercise", 30, 88,
+    3, "3/01/23 20:19", NA, "exercise", 30, 84,
+    3, "3/01/23 20:59", NA, "exercise", 30, 88,
+    4, "3/03/23 21:37", NA, "sugar-free drink", 200, 83,
+    4, "3/03/23 21:52", 5, "sugar-free drink", 200, 78,
+    4, "3/03/23 22:12", NA, "sugar-free drink", 200, 76,
+    4, "3/03/23 22:44", NA, "sugar-free drink", 200, 78,
+    4, "3/03/23 23:25", NA, "sugar-free drink", 200, 74,
+    5, "3/04/23 13:48", NA, "double-double", 1, 71,
+    5, "3/04/23 14:50", 12, "double-double", 1, 174,
+    5, "3/04/23 15:03", NA, "double-double", 1, 174,
+    5, "3/04/23 15:20", NA, "double-double", 1, 208,
+    5, "3/04/23 15:44", NA, "double-double", 1, 202,
+    5, "3/04/23 16:14", NA, "double-double", 1, 162,
+    5, "3/04/23 16:44", NA, "double-double", 1, 140,
+    6, "3/13/23 19:50", NA, "1/4 cup rice", 1, 81,
+    6, "3/13/23 20:09", 9, "1/4 cup rice", 1, 102,
+    6, "3/13/23 20:20", NA, "1/4 cup rice", 1, 137,
+    6, "3/13/23 20:36", NA, "1/4 cup rice", 1, 130,
+    6, "3/13/23 20:51", NA, "1/4 cup rice", 1, 131,
+    6, "3/13/23 21:12", NA, "1/4 cup rice", 1, 116,
+    6, "3/13/23 22:03", NA, "1/4 cup rice", 1, 133,
+    6, "3/13/23 22:49", NA, "1/4 cup rice", 1, 113,
+    6, "3/13/23 22:28", NA, "1/4 cup rice", 1, 118,
+    6, "3/14/23 00:09", NA, "1/4 cup rice", 1, 99,
+    7, "3/19/23 23:42", -3, "1 bundle noodles", 1, 87,
+    7, "3/19/23 23:59", NA, "1 bundle noodles", 1, 90,
+    7, "3/20/23 00:18", NA, "1 bundle noodles", 1, 117,
+    7, "3/20/23 00:46", NA, "1 bundle noodles", 1, 130,
+    7, "3/20/23 01:11", NA, "1 bundle noodles", 1, 116,
+    7, "3/20/23 01:31", NA, "1 bundle noodles", 1, 111,
+    8, "3/24/23 22:24", -10, "Nut Snack", 1, 91,
+    8, "3/24/23 22:45", NA, "Nut Snack", 1, 112,
+    8, "3/24/23 23:00", NA, "Nut Snack", 1, 125,
+    8, "3/24/23 23:28", NA, "Nut Snack", 1, 96,
+    8, "3/24/23 23:48", NA, "Nut Snack", 1, 94,
+    9, "4/15/23 13:42", NA, "1/4 cup rice", 1, 78,
+    9, "4/15/23 13:56", 2, "1/4 cup rice", 1, 112,
+    9, "4/15/23 14:09", NA, "1/4 cup rice", 1, 145,
+    9, "4/15/23 14:21", NA, "1/4 cup rice", 1, 127,
+    9, "4/15/23 14:37", NA, "1/4 cup rice", 1, 114,
+    9, "4/15/23 14:58", NA, "1/4 cup rice", 1, 128,
+    9, "4/15/23 15:22", NA, "1/4 cup rice", 1, 141,
+    9, "4/15/23 15:49", NA, "1/4 cup rice", 1, 120,
+    9, "4/15/23 16:13", NA, "1/4 cup rice", 1, 122,
+    9, "4/15/23 16:46", NA, "1/4 cup rice", 1, 113,
+    10, "5/8/23 10:09", NA, "6 fl oz ice", 1, 98,
+    10, "5/8/23 10:21", 1, "6 fl oz ice", 1, 96,
+    10, "5/8/23 10:32", NA, "6 fl oz ice", 1, 107,
+    10, "5/8/23 10:48", NA, "6 fl oz ice", 1, 123,
+    10, "5/8/23 11:08", NA, "6 fl oz ice", 1, 105,
+    11, "5/26/23 21:48", NA, "2x muffins", 1, 84,
+    11, "5/26/23 21:59", 2, "2x muffins", 1, 84,
+    11, "5/26/23 22:10", NA, "2x muffins", 1, 88,
+    11, "5/26/23 22:20", NA, "2x muffins", 1, 108,
+    11, "5/26/23 22:34", NA, "2x muffins", 1, 112,
+    11, "5/26/23 22:47", NA, "2x muffins", 1, 118,
+    11, "5/26/23 22:59", NA, "2x muffins", 1, 116,
+    11, "5/26/23 23:17", NA, "2x muffins", 1, 122,
+    11, "5/26/23 23:31", NA, "2x muffins", 1, 111,
+    11, "5/26/23 23:47", NA, "2x muffins", 1, 114,
+    11, "5/27/23 00:03", NA, "2x muffins", 1, 116,
+    11, "5/27/23 00:29", NA, "2x muffins", 1, 133,
+    11, "5/27/23 00:46", NA, "2x muffins", 1, 108,
+) %>%
+    mutate(time = mdy_hm(time))
+glu %>%
+    write_csv("data/glu.csv")
+```
+
+```{r reltime.calc}
+calc.reltime <- function(time, reltime) {
+    ref.idx <- which(!is.na(reltime))
+    ref.time <- time[ref.idx]
+    ref.reltime <- reltime[ref.idx]
+    (time - ref.time) / dminutes() + ref.reltime
+}
+glu <- glu %>%
+    group_by(group) %>%
+    mutate(reltime = calc.reltime(time, reltime))
+glimpse(glu)
+```
+
+```{r}
+glu %>%
+    ggplot(aes(reltime, glu, group = group, color = act)) +
+    geom_point() +
+    geom_line() +
+    labs(x = "Relative time (min)", y = "Glucose (mg/dL)", color = "Activity")
+```
